@@ -237,4 +237,5 @@ COPY dungeon_tales_start.sh /dungeon_tales_start.sh
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 && \
     update-alternatives --set python3 /usr/bin/python3.12
 
+RUN chmod +x /dungeon_tales_start.sh
 ENTRYPOINT ["/dungeon_tales_start.sh"]
