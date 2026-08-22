@@ -195,7 +195,7 @@ upgrade_comfyui_if_needed
 
 miniatures_workflows() {
     "$MY_MINIATURES_WORKFLOW/scripts/trellis2_setup.sh"
-    "$MY_MINIATURES_WORKFLOW/scripts/text2image_setup.sh"
+    #"$MY_MINIATURES_WORKFLOW/scripts/text2image_setup.sh"
 }
 
 # Migrate old CUDA 12.4 venv to cu128
@@ -280,7 +280,7 @@ if [ -s "$ARGS_FILE" ]; then
     fi
 fi
 
-cp "$MY_MINIATURES_WORKFLOW"/workflows/* "$COMFYUI_DIR/user/default/workflows/"
+#cp "$MY_MINIATURES_WORKFLOW"/workflows/* "$COMFYUI_DIR/user/default/workflows/"
 
 echo "Starting ComfyUI with args: $FIXED_ARGS"
 python main.py $FIXED_ARGS &
