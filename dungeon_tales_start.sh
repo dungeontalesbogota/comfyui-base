@@ -10,7 +10,7 @@ FILEBROWSER_CONFIG="/root/.config/filebrowser/config.json"
 DB_FILE="/workspace/runpod-slim/filebrowser.db"
 PIP_CONSTRAINT_FILE="/opt/comfyui-runtime-constraints.txt"
 BAKED_NODES=("ComfyUI-Manager" "ComfyUI-KJNodes" "Civicomfy" "ComfyUI-RunpodDirect")
-MY_MINIATURES_WORKFLOW="/tmp/build/my-miniatures-workflow"
+MY_MINIATURES_WORKFLOW="/opt/my-miniatures-workflow"
 
 # ---------------------------------------------------------------------------- #
 #                          Function Definitions                                  #

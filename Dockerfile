@@ -201,10 +201,11 @@ RUN curl -fSL "https://github.com/filebrowser/filebrowser/releases/download/${FI
     rm /tmp/fb.tar.gz
 
 # Download Dungeon Tales workflow and scripts for miniatures production
-RUN curl -fSL "https://github.com/dungeontalesbogota/my-miniatures-workflow/archive/refs/tags/0.1.0.tar.gz" -o my-miniatures-workflow.tar.gz && \
-    mkdir -p my-miniatures-workflow && tar xzf my-miniatures-workflow.tar.gz --strip-components=1 -C my-miniatures-workflow && rm my-miniatures-workflow.tar.gz
-
-RUN chmod +x /tmp/build/my-miniatures-workflow/scripts/*.sh
+RUN curl -fSL "https://github.com/dungeontalesbogota/my-miniatures-workflow/archive/refs/tags/0.1.0.tar.gz" -o /tmp/my-miniatures-workflow.tar.gz && \
+    mkdir -p /opt/my-miniatures-workflow && \
+    tar xzf /tmp/my-miniatures-workflow.tar.gz --strip-components=1 -C /opt/my-miniatures-workflow && \
+    rm /tmp/my-miniatures-workflow.tar.gz && \
+    chmod +x /opt/my-miniatures-workflow/scripts/*.sh
 
 # Set CUDA environment variables
 ENV PATH=/usr/local/cuda/bin:${PATH}
