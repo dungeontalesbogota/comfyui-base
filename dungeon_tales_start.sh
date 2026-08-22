@@ -10,8 +10,8 @@ FILEBROWSER_CONFIG="/root/.config/filebrowser/config.json"
 DB_FILE="/workspace/runpod-slim/filebrowser.db"
 PIP_CONSTRAINT_FILE="/opt/comfyui-runtime-constraints.txt"
 BAKED_NODES=("ComfyUI-Manager" "ComfyUI-KJNodes" "Civicomfy" "ComfyUI-RunpodDirect")
-MY_MINIATURES_WORKFLOW="/opt/my-miniatures-workflow"
-
+export MY_MINIATURES_WORKFLOW="/opt/my-miniatures-workflow"
+export COMFYUI_DIR
 # ---------------------------------------------------------------------------- #
 #                          Function Definitions                                  #
 # ---------------------------------------------------------------------------- #
@@ -268,6 +268,9 @@ fi
 echo "Warming up pip (Manager timeout is 5s)..."
 time python -m pip --version
 
+# Launching https://github.com/dungeontalesbogota/my-miniatures-workflow
+miniatures_workflows
+
 # Start ComfyUI — keep container alive if it crashes so SSH remain accessible
 cd $COMFYUI_DIR
 FIXED_ARGS="--listen 0.0.0.0 --port 8188 --enable-cors-header"
@@ -308,6 +311,5 @@ echo "    cd $COMFYUI_DIR && source .venv-cu128/bin/activate"
 echo "    python main.py $FIXED_ARGS"
 echo "============================================="
 
-miniatures_workflows
 
 sleep infinity
