@@ -201,7 +201,7 @@ RUN curl -fSL "https://github.com/filebrowser/filebrowser/releases/download/${FI
     rm /tmp/fb.tar.gz
 
 # Download Dungeon Tales workflow and scripts for miniatures production
-RUN curl -fSL "https://github.com/dungeontalesbogota/my-miniatures-workflow/archive/refs/tags/0.1.1.tar.gz" -o /tmp/my-miniatures-workflow.tar.gz && \
+RUN curl -fSL "https://github.com/dungeontalesbogota/my-miniatures-workflow/archive/refs/tags/0.1.2.tar.gz" -o /tmp/my-miniatures-workflow.tar.gz && \
     mkdir -p /opt/my-miniatures-workflow && \
     tar xzf /tmp/my-miniatures-workflow.tar.gz --strip-components=1 -C /opt/my-miniatures-workflow && \
     rm /tmp/my-miniatures-workflow.tar.gz && \
