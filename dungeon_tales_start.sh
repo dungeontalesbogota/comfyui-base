@@ -195,7 +195,7 @@ upgrade_comfyui_if_needed
 
 miniatures_workflows() {
     "$MY_MINIATURES_WORKFLOW/scripts/trellis2_setup.sh"
-    "$MY_MINIATURES_WORKFLOW/scripts/get_models.sh"
+    "$MY_MINIATURES_WORKFLOW/scripts/text2image_setup.sh"
     cp "$MY_MINIATURES_WORKFLOW"/workflows/* "$COMFYUI_DIR/user/default/workflows/"
 }
 
