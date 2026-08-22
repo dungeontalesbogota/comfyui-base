@@ -70,13 +70,12 @@ target "common" {
   }
 }
 
-# Regular ComfyUI image (CUDA 12.8 — default)
-target "regular" {
+# Regular Custom ComfyUI image (CUDA 12.8 — default)
+target "dungeon" {
   inherits = ["common"]
   tags = [
-    "runpod/comfyui:${TAG}-cuda12.8",
-    "runpod/comfyui:cuda12.8",
-    "runpod/comfyui:latest",
+    "ghcr.io/dungeontalesbogota/comfyui-base:cuda12.8",
+    "ghcr.io/dungeontalesbogota/comfyui-base:latest",
   ]
 }
 
