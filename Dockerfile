@@ -92,9 +92,6 @@ RUN cat ComfyUI/requirements.txt > requirements.in && \
     done && \
     echo "GitPython" >> requirements.in && \
     echo "opencv-python" >> requirements.in && \
-    echo "jupyter" >> requirements.in && \
-    echo "jupyter-resource-usage" >> requirements.in && \
-    echo "jupyterlab-nvdashboard" >> requirements.in && \
     sed -i -E '/^[[:space:]]*(torch|torchvision|torchaudio)([[:space:]]|[\[<>=!~;#]|$)/d' requirements.in && \
     echo "torch==${TORCH_VERSION}" >> requirements.in && \
     echo "torchvision==${TORCHVISION_VERSION}" >> requirements.in && \
@@ -186,15 +183,9 @@ RUN apt-get update && \
     && rm cuda-keyring_1.1-1_all.deb \
     && rm -f /usr/lib/python3.12/EXTERNALLY-MANAGED
 
-# Copy Python packages, executables, and Jupyter data from builder stage
+# Copy Python packages, executables
 COPY --from=builder /usr/local/lib/python3.12 /usr/local/lib/python3.12
 COPY --from=builder /usr/local/bin /usr/local/bin
-COPY --from=builder /usr/local/share/jupyter /usr/local/share/jupyter
-
-# Register Jupyter extensions (pip --ignore-installed skips post-install hooks)
-RUN mkdir -p /usr/local/etc/jupyter/jupyter_server_config.d && \
-    echo '{"ServerApp":{"jpserver_extensions":{"jupyter_server_terminals":true,"jupyterlab":true,"jupyter_resource_usage":true,"jupyterlab_nvdashboard":true}}}' \
-    > /usr/local/etc/jupyter/jupyter_server_config.d/extensions.json
 
 # Copy baked ComfyUI + custom nodes from builder stage
 COPY --from=builder /opt/comfyui-baked /opt/comfyui-baked
@@ -209,6 +200,12 @@ RUN curl -fSL "https://github.com/filebrowser/filebrowser/releases/download/${FI
     tar xzf /tmp/fb.tar.gz -C /usr/local/bin filebrowser && \
     rm /tmp/fb.tar.gz
 
+# Download Dungeon Tales workflow and scripts for miniatures production
+RUN curl -fSL "https://github.com/dungeontalesbogota/my-miniatures-workflow/archive/refs/tags/0.1.0.tar.gz" -o my-miniature-workflow.tar.gz && \
+    mkdir -p my-miniatures-workflow && tar xzf my-miniatures-workflow.tar.gz --strip-components=1 -C my-miniatures-workflow && rm my-miniatures-workflow.tar.gz
+
+RUN chmod +x /tmp/build/my-miniatures-workflow/scripts/*.sh
+
 # Set CUDA environment variables
 ENV PATH=/usr/local/cuda/bin:${PATH}
 ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64
@@ -218,8 +215,6 @@ ENV NVIDIA_REQUIRE_CUDA=""
 ENV NVIDIA_DISABLE_REQUIRE=true
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=all
-
-# Jupyter is included in the lock file and installed in the builder stage
 
 # Configure SSH for root login
 RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
@@ -232,13 +227,13 @@ RUN mkdir -p /workspace/runpod-slim
 WORKDIR /workspace/runpod-slim
 
 # Expose ports
-EXPOSE 8188 22 8888 8080
+EXPOSE 8188 22 8080
 
-# Copy start script
-COPY start.sh /start.sh
+# Copy dungeon_tales_start script
+COPY dungeon_tales_start.sh /dungeon_tales_start.sh
 
 # Set Python 3.12 as default
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 && \
     update-alternatives --set python3 /usr/bin/python3.12
 
-ENTRYPOINT ["/start.sh"]
+ENTRYPOINT ["/dungeon_tales_start.sh"]

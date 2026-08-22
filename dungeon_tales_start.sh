@@ -10,6 +10,7 @@ FILEBROWSER_CONFIG="/root/.config/filebrowser/config.json"
 DB_FILE="/workspace/runpod-slim/filebrowser.db"
 PIP_CONSTRAINT_FILE="/opt/comfyui-runtime-constraints.txt"
 BAKED_NODES=("ComfyUI-Manager" "ComfyUI-KJNodes" "Civicomfy" "ComfyUI-RunpodDirect")
+MY_MINIATURES_WORKFLOW="/tmp/build/my-miniatures-workflow"
 
 # ---------------------------------------------------------------------------- #
 #                          Function Definitions                                  #
@@ -86,24 +87,6 @@ export_env_vars() {
     # Set permissions
     chmod 644 "$ENV_FILE" "$PAM_ENV_FILE"
     chmod 600 "$SSH_ENV_DIR"
-}
-
-# Start Jupyter Lab server for remote access
-start_jupyter() {
-    mkdir -p /workspace
-    echo "Starting Jupyter Lab on port 8888..."
-    nohup jupyter lab \
-        --allow-root \
-        --no-browser \
-        --port=8888 \
-        --ip=0.0.0.0 \
-        --FileContentsManager.delete_to_trash=False \
-        --FileContentsManager.preferred_dir=/workspace \
-        --ServerApp.root_dir=/workspace \
-        --ServerApp.terminado_settings='{"shell_command":["/bin/bash"]}' \
-        --IdentityProvider.token="${JUPYTER_PASSWORD:-}" \
-        --ServerApp.allow_origin=* &> /jupyter.log &
-    echo "Jupyter Lab started"
 }
 
 # Upgrade the image-managed ComfyUI files while leaving user data on the
@@ -201,8 +184,6 @@ fi
 echo "Starting FileBrowser on port 8080..."
 nohup filebrowser &> /filebrowser.log &
 
-start_jupyter
-
 # Create default comfyui_args.txt if it doesn't exist
 ARGS_FILE="/workspace/runpod-slim/comfyui_args.txt"
 if [ ! -f "$ARGS_FILE" ]; then
@@ -211,6 +192,12 @@ if [ ! -f "$ARGS_FILE" ]; then
 fi
 
 upgrade_comfyui_if_needed
+
+miniatures_workflows() {
+    "$MY_MINIATURES_WORKFLOW/scripts/trellis2_setup.sh"
+    "$MY_MINIATURES_WORKFLOW/scripts/get_models.sh"
+    cp "$MY_MINIATURES_WORKFLOW"/workflows/* "$COMFYUI_DIR/user/default/workflows/"
+}
 
 # Migrate old CUDA 12.4 venv to cu128
 if [ -d "$OLD_VENV_DIR" ] && [ ! -d "$VENV_DIR" ]; then
@@ -281,7 +268,7 @@ fi
 echo "Warming up pip (Manager timeout is 5s)..."
 time python -m pip --version
 
-# Start ComfyUI — keep container alive if it crashes so SSH/Jupyter remain accessible
+# Start ComfyUI — keep container alive if it crashes so SSH remain accessible
 cd $COMFYUI_DIR
 FIXED_ARGS="--listen 0.0.0.0 --port 8188 --enable-cors-header"
 if [ -s "$ARGS_FILE" ]; then
@@ -305,10 +292,9 @@ COMFY_EXIT=0
 wait $COMFY_PID || COMFY_EXIT=$?
 
 if [ "$SHUTTING_DOWN" = "1" ]; then
-    echo "Pod is shutting down (stop/restart/terminate) — stopping ComfyUI, Jupyter and FileBrowser."
+    echo "Pod is shutting down (stop/restart/terminate) — stopping ComfyUI and FileBrowser."
     # Docker only signals PID 1; stop the nohup'd background services too so
     # they exit cleanly instead of waiting for SIGKILL.
-    pkill -TERM -f "jupyter-lab" 2>/dev/null || true
     pkill -TERM -x "filebrowser" 2>/dev/null || true
     exit 0
 fi
@@ -316,10 +302,12 @@ fi
 echo "============================================="
 echo "  ComfyUI exited unexpectedly (exit code $COMFY_EXIT)."
 echo "  Check the logs above for the error/traceback."
-echo "  SSH and JupyterLab are still available."
+echo "  SSH is still available."
 echo "  To restart after fixing:"
 echo "    cd $COMFYUI_DIR && source .venv-cu128/bin/activate"
 echo "    python main.py $FIXED_ARGS"
 echo "============================================="
+
+miniatures_workflows
 
 sleep infinity
